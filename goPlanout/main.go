@@ -1,4 +1,4 @@
-package main
+package planout
 
 import (
 	"crypto/sha1"
@@ -11,7 +11,7 @@ type planoutParams struct {
 	Percentage string
 }
 
-type PlanoutExperiment struct {
+type Experiment struct {
 	Key         string
 	PID         string
 	Choices     []interface{}
@@ -30,18 +30,18 @@ func hash(in string) uint64 {
 	return z
 }
 
-func (exp *PlanoutExperiment) getUniform(min, max float64) float64 {
+func (exp *Experiment) getUniform(min, max float64) float64 {
 	scale, _ := strconv.ParseUint("FFFFFFFFFFFFFFF", 16, 64)
 	h := exp.getHash()
 	shift := float64(h) / float64(scale)
 	return min + shift*(max-min)
 }
 
-func (exp *PlanoutExperiment) getHash() uint64 {
+func (exp *Experiment) getHash() uint64 {
 	return hash(exp.Key + "." + exp.PID)
 }
 
-func (exp *PlanoutExperiment) getCummulativeWeights() (float64, []float64) {
+func (exp *Experiment) getCummulativeWeights() (float64, []float64) {
 	nweights := len(exp.Percentages)
 	cweights := make([]float64, nweights)
 	sum := 0.0
@@ -52,7 +52,7 @@ func (exp *PlanoutExperiment) getCummulativeWeights() (float64, []float64) {
 	return sum, cweights
 }
 
-func (exp *PlanoutExperiment) execute() interface{} {
+func (exp *Experiment) Execute() interface{} {
 	sum, cweights := exp.getCummulativeWeights()
 	stop_val := exp.getUniform(0.0, sum)
 	fmt.Println(stop_val)
@@ -62,9 +62,4 @@ func (exp *PlanoutExperiment) execute() interface{} {
 		}
 	}
 	return nil
-}
-
-func main() {
-	nexExp := PlanoutExperiment{Key: "blah", PID: "blah", Choices: []interface{}{true, false}, Percentages: []float64{0.5, 0.5}}
-	fmt.Println(nexExp.execute())
 }
