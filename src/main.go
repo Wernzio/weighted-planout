@@ -1,8 +1,8 @@
 package main
 
 import (
+	planout "./goPlanout"
 	"fmt"
-	planout "github.com/Wernzio/weighted-planout"
 )
 
 func main() {
