@@ -9,13 +9,12 @@ import (
 
 func main() {
 	start := time.Now()
-	nexExp := planout.Experiment{Key: "blah", Choices: []interface{}{true, false}, Percentages: []float64{0.5, 0.5}}
-	nexExp.Init()
+	nexExp := planout.NewExp("blah", []interface{}{true, false}, []float64{0.05, 0.95})
 	var wg sync.WaitGroup
 	i := 0
 	for i < 1000000 {
 		wg.Add(1)
-		go nexExp.Execute("blah", &wg)
+		go nexExp.Execute("blah")
 		i++
 	}
 	wg.Wait()
