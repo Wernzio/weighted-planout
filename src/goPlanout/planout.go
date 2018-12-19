@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"strconv"
-	"sync"
 )
 
 type Experiment struct {
@@ -28,6 +27,22 @@ func hash(in string) uint64 {
 	return z
 }
 
+func NewExp(key string, choices []interface{}, percentages []float64) *Experiment {
+	exp := Experiment{Key: key, Choices: choices, Percentages: percentages}
+	exp.getCummulativeWeights()
+	return &exp
+}
+
+func (exp *Experiment) Execute(PID string) interface{} {
+	stop_val := exp.getUniform(PID, 0.0, exp.sum)
+	for i := range exp.cweights {
+		if stop_val <= exp.cweights[i] {
+			return exp.Choices[i]
+		}
+	}
+	return nil
+}
+
 func (exp *Experiment) getUniform(PID string, min, max float64) float64 {
 	scale, _ := strconv.ParseUint("FFFFFFFFFFFFFFF", 16, 64)
 	h := hash(exp.Key + "." + PID)
@@ -45,19 +60,4 @@ func (exp *Experiment) getCummulativeWeights() {
 	}
 	exp.sum = sum
 	exp.cweights = cweights
-}
-
-func (exp *Experiment) Init() {
-	exp.getCummulativeWeights()
-}
-
-func (exp *Experiment) Execute(PID string, wg *sync.WaitGroup) interface{} {
-	defer wg.Done()
-	stop_val := exp.getUniform(PID, 0.0, exp.sum)
-	for i := range exp.cweights {
-		if stop_val <= exp.cweights[i] {
-			return exp.Choices[i]
-		}
-	}
-	return nil
 }
