@@ -1,7 +1,7 @@
 package main
 
 import (
-	planout "./goPlanout"
+	planout "./planout"
 	"fmt"
 	"sync"
 	"time"
@@ -9,12 +9,16 @@ import (
 
 func main() {
 	start := time.Now()
-	nexExp := planout.NewExp("blah", []interface{}{true, false}, []float64{0.05, 0.95})
+	nexExp, _ := planout.NewExp("blah", []interface{}{true, false}, []float64{0.05, 0.95})
 	var wg sync.WaitGroup
 	i := 0
-	for i < 1000000 {
+	for i < 10000000 {
 		wg.Add(1)
-		go nexExp.Execute("blah")
+		go func(wg *sync.WaitGroup) {
+			nexExp.Execute("blah")
+			nexExp.UsersPercentage("blah")
+			wg.Done()
+		}(&wg)
 		i++
 	}
 	wg.Wait()
