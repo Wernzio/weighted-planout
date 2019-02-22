@@ -16,7 +16,6 @@ func main() {
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			nexExp.Execute("blah")
-			nexExp.UsersPercentage("blah")
 			wg.Done()
 		}(&wg)
 		i++
